@@ -62,8 +62,8 @@ local Config = {
 	URLs = {
 		Supported = "https://raw.githubusercontent.com/pickapicksmm/Pickas-Hub/refs/heads/main/GameSupported/Supported.lua",
 		Premium = "https://raw.githubusercontent.com/pickapicksmm/Pickas-Hub/refs/heads/main/GameSupported/Premium.lua",
-		Keysystem = "https://raw.githubusercontent.com/pickapicksmm/Pickas-Hub/refs/heads/main/GameSupported/Keysystem.lua",
-		Keyless = "https://raw.githubusercontent.com/pickapicksmm/Pickas-Hub/refs/heads/main/GameSupported/Keyless.lua",
+		Keysystem = "https://raw.githubusercontent.com/pickapicksmm/Pickas-Hub/refs/heads/main/GameSupported/Keyless.lua",
+		Keyless = "https://raw.githubusercontent.com/pickapicksmm/Pickas-Hub/refs/heads/main/GameSupported/Keysystem.lua",
 	},
 }
 
