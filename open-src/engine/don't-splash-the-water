@@ -1,0 +1,112 @@
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+-- Configuration para sa mga kulay ng highlight
+local ESPConfig = {
+Player = {Color = Color3.fromRGB(0, 255, 0), Name = "PLAYER"},
+Monster = {Color = Color3.fromRGB(255, 0, 0), Name = "MONSTER"},
+Safe = {Color = Color3.fromRGB(255, 255, 0), Name = "SAFE PATH"},
+Code = {Color = Color3.fromRGB(180, 0, 255), Name = "CODE SNAP"}
+}
+-- Movement variables (baguhin ang mga numero rito para mag-adjust ng speed)
+local TargetWalkSpeed = 35
+local TargetFlySpeed = 70
+local FlyActive = false -- Gawing true para lumipad agad pag-inject
+-- Core Function para sa paggawa ng Highlight at Distance Billboards
+local function CreateVisuals(obj, cfg)
+if not obj or obj:FindFirstChild("Game_ESP_Highlight") then return end
+local hl = Instance.new("Highlight")
+hl.Name = "Game_ESP_Highlight"
+hl.FillColor = cfg.Color
+hl.FillTransparency = 0.4
+hl.OutlineColor = Color3.fromRGB(255, 255, 255)
+hl.OutlineTransparency = 0.2
+hl.Adornee = obj
+hl.Parent = obj
+local part = obj:FindFirstChild("ListenerTorso") or obj:FindFirstChild("HumanoidRootPart") or obj:FindFirstChildWhichIsA("BasePart") or obj.PrimaryPart
+if not part then return end
+local bb = Instance.new("BillboardGui")
+bb.Name = "Game_ESP_Billboard"
+bb.Size = UDim2.new(0, 150, 0, 40)
+bb.AlwaysOnTop = true
+bb.ExtentsOffset = Vector3.new(0, 4, 0)
+bb.Adornee = part
+bb.Parent = obj
+local lbl = Instance.new("TextLabel")
+lbl.Size = UDim2.new(1, 0, 1, 0)
+lbl.BackgroundTransparency = 1
+lbl.TextColor3 = cfg.Color
+lbl.TextSize = 13
+lbl.Font = Enum.Font.SourceSansBold
+lbl.TextStrokeTransparency = 0
+lbl.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+lbl.Parent = bb
+local renderConnection
+renderConnection = RunService.RenderStepped:Connect(function()
+if not obj or not obj.Parent or not part or not hl or not bb then
+renderConnection:Disconnect()
+return
+end
+if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+local dist = (LocalPlayer.Character.HumanoidRootPart.Position - part.Position).Magnitude
+lbl.Text = string.format("%s [%d Studs]", cfg.Name, math.floor(dist))
+end
+end)
+end
+-- Sorter engine para i-classify ang mga bagay sa workspace
+local function CheckInstance(v)
+if not v or not v.Parent then return end
+local nameLower = string.lower(v.Name)
+if v.Name == "Monster" or v.Name == "BlindMonster" or v:FindFirstChild("ListenerTorso") or string.find(nameLower, "monster") then
+CreateVisuals(v, ESPConfig.Monster)
+elseif v:IsA("Model") and Players:GetPlayerFromCharacter(v) then
+if v ~= LocalPlayer.Character then
+CreateVisuals(v, ESPConfig.Player)
+end
+elseif string.find(nameLower, "code") or string.find(nameLower, "snap") or v.Name == "CodeSign" then
+CreateVisuals(v, ESPConfig.Code)
+elseif string.find(nameLower, "path") or string.find(nameLower, "safe") or string.find(nameLower, "platform") or v.Name == "SafePlatform" then
+CreateVisuals(v, ESPConfig.Safe)
+end
+end
+workspace.DescendantAdded:Connect(CheckInstance)
+for _, item in ipairs(workspace:GetDescendants()) do
+CheckInstance(item)
+end
+Players.PlayerAdded:Connect(function(p)
+p.CharacterAdded:Connect(function(char)
+task.wait(0.5)
+CheckInstance(char)
+end)
+end)
+-- Flight at WalkSpeed Engine mechanics loop
+local BodyGyro = Instance.new("BodyGyro")
+local BodyVelocity = Instance.new("BodyVelocity")
+BodyGyro.P = 9e4
+BodyVelocity.Velocity = Vector3.new(0, 0, 0)
+BodyVelocity.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+RunService.RenderStepped:Connect(function()
+if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+local humanoid = LocalPlayer.Character.Humanoid
+local rootPart = LocalPlayer.Character.HumanoidRootPart
+if not FlyActive then
+humanoid.WalkSpeed = TargetWalkSpeed
+if BodyGyro.Parent then BodyGyro.Parent = nil end
+if BodyVelocity.Parent then BodyVelocity.Parent = nil end
+else
+humanoid.WalkSpeed = 0
+BodyGyro.Parent = rootPart
+BodyVelocity.Parent = rootPart
+BodyGyro.CFrame = workspace.CurrentCamera.CFrame
+local moveDirection = humanoid.MoveDirection
+local cameraCFrame = workspace.CurrentCamera.CFrame
+local velocityVector = Vector3.new(0, 0, 0)
+if moveDirection.Magnitude > 0 then
+velocityVector = cameraCFrame:VectorToWorldSpace(Vector3.new(moveDirection.X, 0, moveDirection.Z)) * TargetFlySpeed
+end
+BodyVelocity.Velocity = velocityVector
+end
+end
+end)
+print("Raw Engine Successfully Loaded.")
