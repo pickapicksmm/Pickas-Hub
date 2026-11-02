@@ -1,5 +1,5 @@
 local Games = {
-	[] = "",
+	[6015491985] = "https://raw.githubusercontent.com/pickapicksmm/Pickas-Hub/refs/heads/main/Script/Games/MathTowerRace.lua",
 }
 
 local universeId = game.GameId
