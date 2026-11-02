@@ -1,5 +1,6 @@
 local Games = {
-	[] = "",
+	[11649987817] = "https://raw.githubusercontent.com/pickapicksmm/Pickas-Hub/refs/heads/main/Script/Games/Keysystem/Piano-Rhythm-Tiles.lua",
+	[6015491985] = " https://raw.githubusercontent.com/pickapicksmm/Pickas-Hub/refs/heads/main/Script/Games/Keysystem/MathTowerRace.lua", 
 }
 
 local universeId = game.GameId
