@@ -1,7 +1,7 @@
 local Games = {
 	[6015491985] = "https://raw.githubusercontent.com/pickapicksmm/Pickas-Hub/refs/heads/main/Script/Games/MathTowerRace.lua",
 	[11649987817] = "https://github.com/pickapicksmm/Pickas-Hub/blob/main/Script/Games/Piano-Rhythm-Tiles.lua", 
-	[6035872082] = "https://raw.githubusercontent.com/pickapicksmm/Pickas-Hub/refs/heads/main/Script/Games/Rivals.lua"
+	[6035872082] = "https://raw.githubusercontent.com/pickapicksmm/Pickas-Hub/refs/heads/main/Script/Games/Rivals.lua", 
 }
 
 local universeId = game.GameId
