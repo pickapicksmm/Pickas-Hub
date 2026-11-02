@@ -1,6 +1,5 @@
--- Supported games: [UniverseId] = script URL
 local Games = {
-	[897772] = "https://raw.githubusercontent.com/pickapicksmm/Source/refs/heads/main/MathTowerRace.lua",
+	[] = "",
 }
 
 local universeId = game.GameId
