@@ -2,18 +2,38 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
--- Configuration para sa mga kulay ng highlight
+local mt = getrawmetatable(game)
+local oldIndex = mt.__index
+local oldNewIndex = mt.__newindex
+setreadonly(mt, false)
+mt.__index = newcclosure(function(t, k)
+if not checkcaller() and t:IsA("Humanoid") and t.Parent == LocalPlayer.Character then
+if k == "WalkSpeed" then
+return 16
+elseif k == "JumpPower" then
+return 50
+end
+end
+return oldIndex(t, k)
+end)
+mt.__newindex = newcclosure(function(t, k, v)
+if not checkcaller() and t:IsA("Humanoid") and t.Parent == LocalPlayer.Character then
+if k == "WalkSpeed" or k == "JumpPower" then
+return
+end
+end
+oldNewIndex(t, k, v)
+end)
+setreadonly(mt, true)
 local ESPConfig = {
 Player = {Color = Color3.fromRGB(0, 255, 0), Name = "PLAYER"},
 Monster = {Color = Color3.fromRGB(255, 0, 0), Name = "MONSTER"},
 Safe = {Color = Color3.fromRGB(255, 255, 0), Name = "SAFE PATH"},
 Code = {Color = Color3.fromRGB(180, 0, 255), Name = "CODE SNAP"}
 }
--- Movement variables (baguhin ang mga numero rito para mag-adjust ng speed)
 local TargetWalkSpeed = 35
 local TargetFlySpeed = 70
-local FlyActive = false -- Gawing true para lumipad agad pag-inject
--- Core Function para sa paggawa ng Highlight at Distance Billboards
+local FlyActive = false
 local function CreateVisuals(obj, cfg)
 if not obj or obj:FindFirstChild("Game_ESP_Highlight") then return end
 local hl = Instance.new("Highlight")
@@ -54,7 +74,6 @@ lbl.Text = string.format("%s [%d Studs]", cfg.Name, math.floor(dist))
 end
 end)
 end
--- Sorter engine para i-classify ang mga bagay sa workspace
 local function CheckInstance(v)
 if not v or not v.Parent then return end
 local nameLower = string.lower(v.Name)
@@ -80,7 +99,6 @@ task.wait(0.5)
 CheckInstance(char)
 end)
 end)
--- Flight at WalkSpeed Engine mechanics loop
 local BodyGyro = Instance.new("BodyGyro")
 local BodyVelocity = Instance.new("BodyVelocity")
 BodyGyro.P = 9e4
@@ -109,4 +127,4 @@ BodyVelocity.Velocity = velocityVector
 end
 end
 end)
-print("Raw Engine Successfully Loaded.")
+print("Loaded")
