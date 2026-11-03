@@ -12,7 +12,7 @@ local Library = loadstring(game:HttpGet(
 Library:SetAccent(Color3.fromRGB(157, 0, 255))
 
 --// SERVICES
-local Players = game:GetService("Players")
+local Players = game:GetSe1rvice("Players")
 local RunService = game:GetService("RunService")
 
 local LP = Players.LocalPlayer
@@ -20,9 +20,9 @@ local LP = Players.LocalPlayer
 --// CONFIGURATION
 local Config = {
     PlayerESP = false,
-    MonsterESP = true,
-    SafeESP = true,
-    CodeESP = true
+    MonsterESP = false,
+    SafeESP = false,
+    CodeESP = false
 }
 
 --// WINDOW
