@@ -1,8 +1,8 @@
 local API = "https://pickashub-script-api.pickazhub.workers.dev"
 
 local Games = {
-    [1234567890]="PH-66QFE2",
-    [9876543210]="PH-Y66SXU",
+    [6015491985]="PH-66QFE2",
+    [10766845655]="PH-Y66SXU",
 }
 
 local ScriptID = Games[game.GameId]
