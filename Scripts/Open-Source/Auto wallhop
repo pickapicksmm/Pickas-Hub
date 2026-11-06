@@ -1,0 +1,150 @@
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local LP = Players.LocalPlayer
+
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/pickapicksmm/Pickas-Hub/refs/heads/main/Libray.src/PHLibrary.lua"))()
+
+local Window = Library:CreateWindow({
+    Title = "Picka's Hub",
+})
+
+---------------------------------------------------------------- UI
+local WallhopTab = Window:AddTab({ Title = "Wallhop", Icon = "chevrons-up" })
+local MainSub = WallhopTab:AddSubTab({ Title = "Main", Icon = "zap" })
+
+local State = {
+    Auto = false,
+    Flip = false,
+}
+
+MainSub:AddToggle({
+    Title = "Auto Wallhop",
+    Flag = "AutoWallhop",
+    Default = false,
+    Callback = function(v) State.Auto = v end,
+})
+
+MainSub:AddCheckbox({
+    Title = "Camera Flip",
+    Flag = "WallhopCameraFlip",
+    Default = false,
+    Callback = function(v) State.Flip = v end,
+})
+
+MainSub:AddDivider()
+MainSub:AddSection({ Title = "Invite" })
+MainSub:AddCommunityCard({
+    Title = "Discord",
+    Link = "https://discord.gg/Q59nNsn8xQ",
+    Icon = "discord",
+    Color = Color3.fromRGB(88, 101, 242),
+})
+
+WallhopTab:Select()
+
+---------------------------------------------------------------- Wallhop logic
+local COOLDOWN  = 0.30  -- seconds between hops
+local WALL_DIST = 2.8   -- how close a wall must be (studs)
+local PUSH      = 26    -- horizontal speed away from the wall
+local FLIP_TIME = 0.18  -- how long the camera is forced to face away
+
+local params = RaycastParams.new()
+params.FilterType = Enum.RaycastFilterType.Exclude
+params.IgnoreWater = true
+
+-- 8 horizontal directions around the character
+local DIRS = {}
+for i = 0, 7 do
+    local a = i * math.pi / 4
+    DIRS[#DIRS + 1] = Vector3.new(math.cos(a), 0, math.sin(a))
+end
+
+local lastHop = 0
+local flipUntil, flipDir = 0, nil
+
+local function jumpVelocity(hum)
+    if hum.UseJumpPower then
+        return hum.JumpPower
+    end
+    return math.sqrt(2 * workspace.Gravity * hum.JumpHeight)
+end
+
+-- returns the closest nearby wall's horizontal normal, or nil
+local function findWall(char, root)
+    params.FilterDescendantsInstances = { char }
+    local bestDist, bestNormal
+    for _, dir in ipairs(DIRS) do
+        local hit = workspace:Raycast(root.Position, dir * WALL_DIST, params)
+        if hit and hit.Instance.CanCollide and math.abs(hit.Normal.Y) < 0.35 then
+            if not bestDist or hit.Distance < bestDist then
+                bestDist = hit.Distance
+                bestNormal = Vector3.new(hit.Normal.X, 0, hit.Normal.Z)
+            end
+        end
+    end
+    if bestNormal and bestNormal.Magnitude > 0 then
+        return bestNormal.Unit
+    end
+end
+
+local function yawOf(v)
+    return math.atan2(-v.X, -v.Z)
+end
+
+-- Heartbeat: detect wall in the air and hop off it
+local hbConn
+hbConn = RunService.Heartbeat:Connect(function()
+    if not Window._gui or not Window._gui.Parent then
+        hbConn:Disconnect()
+        pcall(function() RunService:UnbindFromRenderStep("PH_WallhopFlip") end)
+        return
+    end
+    if not State.Auto then return end
+
+    local char = LP.Character
+    local hum = char and char:FindFirstChildOfClass("Humanoid")
+    local root = char and char:FindFirstChild("HumanoidRootPart")
+    if not (hum and root) or hum.Health <= 0 then return end
+    if os.clock() - lastHop < COOLDOWN then return end
+
+    -- only while airborne
+    local st = hum:GetState()
+    local airborne = hum.FloorMaterial == Enum.Material.Air
+        and (st == Enum.HumanoidStateType.Freefall or st == Enum.HumanoidStateType.Jumping)
+    if not airborne then return end
+
+    local n = findWall(char, root)
+    if not n then return end
+
+    lastHop = os.clock()
+
+    -- hop: away from the wall + upward
+    hum:ChangeState(Enum.HumanoidStateType.Jumping)
+    root.AssemblyLinearVelocity = Vector3.new(n.X * PUSH, jumpVelocity(hum), n.Z * PUSH)
+    root.CFrame = CFrame.lookAt(root.Position, root.Position + n)
+
+    if State.Flip then
+        flipDir = n
+        flipUntil = os.clock() + FLIP_TIME
+    end
+end)
+
+-- Camera flip: briefly turn the camera to face away from the wall
+RunService:BindToRenderStep("PH_WallhopFlip", Enum.RenderPriority.Camera.Value + 1, function()
+    if not flipDir or os.clock() > flipUntil then return end
+    local cam = workspace.CurrentCamera
+    local char = LP.Character
+    local root = char and char:FindFirstChild("HumanoidRootPart")
+    if not (cam and root) then return end
+
+    local look = cam.CFrame.LookVector
+    look = Vector3.new(look.X, 0, look.Z)
+    if look.Magnitude < 1e-3 then return end
+
+    local delta = yawOf(flipDir) - yawOf(look.Unit)
+    delta = (delta + math.pi) % (2 * math.pi) - math.pi
+
+    local p = root.Position
+    cam.CFrame = CFrame.new(p) * CFrame.Angles(0, delta, 0) * CFrame.new(-p) * cam.CFrame
+end)
