@@ -1,0 +1,13 @@
+{
+  "Language": "en",
+  "ThemeName": "Amethyst",
+  "Transparency": 0,
+  "CornerRadius": 12,
+  "AnimSpeed": 1,
+  "ReduceAnimations": false,
+  "OrbSize": 44,
+  "FontName": "Gotham",
+  "FontScale": 1,
+  "AutoSave": false,
+  "CustomThemes": {}
+}
