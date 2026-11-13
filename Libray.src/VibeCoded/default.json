@@ -1,0 +1,15 @@
+{
+  "Format": 1,
+  "Library": "PickasUI",
+  "Version": "1.0.0",
+  "Saved": 0,
+  "Flags": {
+    "AutoFarm": true,
+    "WalkSpeed": 50,
+    "Target": "Nearest",
+    "EspColor": "#FF5078",
+    "Targets": [
+      "Players"
+    ]
+  }
+}
