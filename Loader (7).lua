@@ -4,7 +4,7 @@
 	(o ilagay ang file sa executor workspace folder bilang "AsterveilUI.lua" para local ang load).
 ]]
 
-local LIB_URL = "https://raw.githubusercontent.com/pickapicksmm/Asterveil-Hub/refs/heads/main/Library/AsterveilUI.lua"
+local LIB_URL = "https://raw.githubusercontent.com/pickapicksmm/Pickas-Hub/refs/heads/main/AsterveilUI%20(5).lua"
 local LOCAL_FILE = "AsterveilUI.lua"
 
 ------------------------------------------------------------ load library
